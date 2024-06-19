@@ -5,39 +5,42 @@ import products from '@/assets/data/products'
 import { defaultPizzaImage } from '@/src/components/ProductListItem'
 import { useState } from 'react'
 import Button from '@/src/components/Button'
-const sizes = ['S', 'M' , 'L', 'XL'];
+const sizes = ['S', 'M', 'L', 'XL'];
 
 
 
 const ProductDetailsSreen = () => {
     // get product id
     const { id } = useLocalSearchParams();
-    
+
     const [selectedSize, setSelectedSize] = useState('M');
 
-    const product = products.find((p) => p.id.toString() === id )
-    
+    const product = products.find((p) => p.id.toString() === id)
+
     // function add to cart 
     const addToCart = () => {
         console.warn('Add to cart ', selectedSize);
     }
-    if(!product){
+    if (!product) {
         return <Text>Product not found</Text>
     }
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{ title: product.name }} /> 
-            <Image source={{ uri: product.image || defaultPizzaImage}} style={styles.image} />
-            <Text>Select size</Text>
+            <Stack.Screen options={{ title: product.name }} />
+            <Image
+                source={{ uri: product.image || defaultPizzaImage }}
+                style={styles.image}
+                resizeMode='contain' />
+            <Text style={styles.subtitle}>Select size</Text>
             <View style={styles.sizes}>
                 {sizes.map((size) =>
-                    <Pressable  
-                    onPress={() => {setSelectedSize(size)}}
-                    key={size} style={[
-                        styles.size,
-                        {
-                            backgroundColor: selectedSize === size ? 'gainsboro' : 'white'
-                        }
+                    <Pressable
+                        onPress={() => { setSelectedSize(size) }}
+                        key={size} style={[
+                            styles.size,
+                            {
+                                backgroundColor: selectedSize === size ? 'gainsboro' : 'white'
+                            }
                         ]}>
                         <Text style={[
                             styles.sizeText,
@@ -50,7 +53,7 @@ const ProductDetailsSreen = () => {
             </View>
             <Text style={styles.price}>${product.price}</Text>
 
-            <Button onPress={addToCart} text='Add to cart'/>
+            <Button onPress={addToCart} text='Add to cart' />
         </View>
     )
 }
@@ -69,6 +72,10 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 'auto'
+    },
+    subtitle: {
+        marginVertical: 10,
+        fontWeight: '600',
     },
     sizes: {
         flexDirection: 'row',

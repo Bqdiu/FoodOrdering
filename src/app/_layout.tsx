@@ -52,7 +52,7 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="cart" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
   );
