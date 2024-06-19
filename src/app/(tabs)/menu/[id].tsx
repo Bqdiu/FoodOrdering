@@ -5,7 +5,10 @@ import products from '@/assets/data/products'
 import { defaultPizzaImage } from '@/src/components/ProductListItem'
 import { useState } from 'react'
 import Button from '@/src/components/Button'
-const sizes = ['S', 'M', 'L', 'XL'];
+import { useCart } from '@/src/providers/CartProvider'
+import { PizzaSize } from '@/src/types'
+
+const sizes: PizzaSize[] = ['S', 'M', 'L', 'XL'];
 
 
 
@@ -13,13 +16,17 @@ const ProductDetailsSreen = () => {
     // get product id
     const { id } = useLocalSearchParams();
 
-    const [selectedSize, setSelectedSize] = useState('M');
+    const {addItem} = useCart();
+
+    const [selectedSize, setSelectedSize] = useState<PizzaSize>('M');
 
     const product = products.find((p) => p.id.toString() === id)
 
     // function add to cart 
     const addToCart = () => {
-        console.warn('Add to cart ', selectedSize);
+        if(!product)
+            return;
+        addItem(product,selectedSize);
     }
     if (!product) {
         return <Text>Product not found</Text>
