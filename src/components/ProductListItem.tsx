@@ -11,7 +11,6 @@ export const defaultPizzaImage = 'https://notjustdev-dummy.s3.us-east-2.amazonaw
 
 const ProductListItem = ({ product } : ProductListItemProps) => {
     const segment = useSegments();
-    // console.log(segment);
     return (
         <Link href={`/${segment[0]}/menu/${product.id}`} asChild>
             <Pressable style={styles.container}>

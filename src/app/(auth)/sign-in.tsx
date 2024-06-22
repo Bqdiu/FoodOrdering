@@ -25,6 +25,7 @@ function SignInScreen() {
                 value={password}
                 onChangeText={setPassword}
                 style={styles.textInput}
+                secureTextEntry
             />
 
             <Button text='Sign in' />
