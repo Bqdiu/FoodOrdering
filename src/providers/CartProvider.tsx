@@ -3,7 +3,7 @@ import { CardItem, Product } from "../types";
 import { randomUUID } from "expo-crypto";
 
 type CartType = {
-    items : CardItem[],
+    items: CardItem[],
     addItem: (product: Product, size: CardItem['size']) => void;
     updateQuantity: (itemID: string, amount: -1 | 1) => void;
     total: number;
@@ -11,22 +11,22 @@ type CartType = {
 
 const CartContext = createContext<CartType>({
     items: [],
-    addItem: () => {},
-    updateQuantity: () => {},
+    addItem: () => { },
+    updateQuantity: () => { },
     total: 0,
 });
 
-const CartProvider = ({children} : PropsWithChildren) => {
-    
+const CartProvider = ({ children }: PropsWithChildren) => {
+
     const [items, setItems] = useState<CardItem[]>([]);
 
     const addItem = (product: Product, size: CardItem['size']) => {
         // if already in cart, increment quantity
         const existingItem = items.find(item => item.product === product && item.size === size);
-        if(existingItem){
+        if (existingItem) {
             updateQuantity(existingItem.id, 1);
             return;
-        } 
+        }
 
         const newCartItem: CardItem = {
             id: randomUUID(), // generate random id
@@ -48,9 +48,9 @@ const CartProvider = ({children} : PropsWithChildren) => {
     const total = items.reduce((sum, item) => (sum += item.product.price * item.quantity), 0);
 
     return (
-      <CartContext.Provider value={{items, addItem, updateQuantity, total }}>
-        {children}
-      </CartContext.Provider>  
+        <CartContext.Provider value={{ items, addItem, updateQuantity, total }}>
+            {children}
+        </CartContext.Provider>
     );
 }
 

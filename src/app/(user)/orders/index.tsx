@@ -13,7 +13,7 @@ const OrdersScreen = () => {
                 data={orders}
                 renderItem={({ item }) => <OrdersListItem order={item} />}
                 contentContainerStyle={{ gap: 10, padding: 10 }}
-                
+
             />
         </>
     );
