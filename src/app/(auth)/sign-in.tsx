@@ -16,6 +16,8 @@ function SignInScreen() {
         if (error) Alert.alert(error.message);
         setLoading(false);
     };
+
+
     
     return (
         <View style={styles.container}>
