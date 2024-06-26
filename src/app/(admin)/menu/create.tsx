@@ -4,7 +4,8 @@ import Button from '@/src/components/Button';
 import { defaultPizzaImage } from '@/src/components/ProductListItem';
 import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useInsertProduct } from '@/src/api/products';
 
 const CreateProductScreen = () => {
 
@@ -15,6 +16,10 @@ const CreateProductScreen = () => {
 
     const { id } = useLocalSearchParams();
     const isUpdating = !!id;
+
+    const { mutate: insertProduct } = useInsertProduct();
+    
+    const router = useRouter();
 
     const resetField = () => {
         setName('');
@@ -55,11 +60,10 @@ const CreateProductScreen = () => {
     };
 
     const onSubmit = () => {
-        if(isUpdating){
+        if (isUpdating) {
             // update
             onUpdate();
-        }else
-        {
+        } else {
             //create
             onCreate();
         }
@@ -70,8 +74,13 @@ const CreateProductScreen = () => {
         }
         console.warn('Creating product: ', name);
         // Save in the database
-
-        resetField();
+        insertProduct({ name, price: parseFloat(price), image },
+            {
+                onSuccess: () => {
+                    resetField();
+                    router.back();
+                }
+            })
     };
 
     const onUpdate = () => {
@@ -85,11 +94,11 @@ const CreateProductScreen = () => {
     };
 
     const onDelete = () => {
-        console.warn("Delete !!!!!!!!!!!!!");  
+        console.warn("Delete !!!!!!!!!!!!!");
     };
 
     const confimDelete = () => {
-        Alert.alert('Comfirm','Are you sure you want to delete this product',[
+        Alert.alert('Comfirm', 'Are you sure you want to delete this product', [
             {
                 text: 'Cancel'
             },
@@ -103,7 +112,7 @@ const CreateProductScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{title: isUpdating ? "Update Product" : 'Create Product' }} />
+            <Stack.Screen options={{ title: isUpdating ? "Update Product" : 'Create Product' }} />
             <Image source={{ uri: image || defaultPizzaImage }} style={styles.img} />
             <Text
                 style={styles.textButton}
