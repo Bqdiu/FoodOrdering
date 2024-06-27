@@ -57,8 +57,8 @@ export const useUpdateProduct = () => {
                 image: data.image,
                 price: data.price
             })
-            .eq('id', data.id)
-            .single();
+                .eq('id', data.id)
+                .single();
 
             if (error) {
                 throw new Error(error.message);
@@ -70,4 +70,19 @@ export const useUpdateProduct = () => {
             await queryClient.invalidateQueries({ queryKey: ['products', id] });
         },
     })
+}
+
+export const useDeleteProduct = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        async mutationFn(id: number) {
+            const { error } = await supabase.from('products').delete().eq('id', id);
+            if (error) {
+                throw new Error(error.message);
+            }
+        },
+        async onSuccess() {
+            await queryClient.invalidateQueries({ queryKey: ['products'] });
+        }
+    });
 }
