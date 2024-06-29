@@ -1,1 +1,1 @@
-Start learning React Native
+React Native
