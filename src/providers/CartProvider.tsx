@@ -1,6 +1,10 @@
 import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { CardItem, Tables } from "../types";
 import { randomUUID } from "expo-crypto";
+import { useInsertOrder } from "../api/orders";
+import { useRouter } from "expo-router";
+import { useAuth } from "./AuthProvider";
+import { useInsertOrderItems } from "../api/order_items";
 
 type Product = Tables<'products'>
 
@@ -9,6 +13,7 @@ type CartType = {
     addItem: (product: Product, size: CardItem['size']) => void;
     updateQuantity: (itemID: string, amount: -1 | 1) => void;
     total: number;
+    checkout: () => void;
 }
 
 const CartContext = createContext<CartType>({
@@ -16,11 +21,18 @@ const CartContext = createContext<CartType>({
     addItem: () => { },
     updateQuantity: () => { },
     total: 0,
+    checkout: () => { }
 });
 
 const CartProvider = ({ children }: PropsWithChildren) => {
 
     const [items, setItems] = useState<CardItem[]>([]);
+    const { mutate: insertOrder } = useInsertOrder();
+    const { mutate: insertOrderItems } = useInsertOrderItems();
+    const clearCart = () => {
+        setItems([]);
+    }
+    const router = useRouter();
 
     const addItem = (product: Product, size: CardItem['size']) => {
         // if already in cart, increment quantity
@@ -48,12 +60,38 @@ const CartProvider = ({ children }: PropsWithChildren) => {
     };
 
     const total = items.reduce((sum, item) => (sum += item.product.price * item.quantity), 0);
+    const { session } = useAuth();
+    const userID = session?.user.id;
+    const checkout = () => {
+        insertOrder(
+            { total, user_id: userID ?? '' },
+            {
+                onSuccess: saveOrderItems
+            });
+    }
 
+    const saveOrderItems = (order: Tables<'orders'>) => {
+        const orderItems = items.map(cartItem => ({
+            order_id: order.id,
+            product_id: cartItem.product_id,
+            quantity: cartItem.quantity,
+            size: cartItem.size
+        }));
+        insertOrderItems(
+            orderItems,
+            {
+                onSuccess: () => {
+                    clearCart();
+                    router.back();
+                }
+            })
+    }
     return (
-        <CartContext.Provider value={{ items, addItem, updateQuantity, total }}>
+        <CartContext.Provider value={{ items, addItem, updateQuantity, total, checkout }}>
             {children}
         </CartContext.Provider>
     );
+
 }
 
 export default CartProvider;

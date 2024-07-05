@@ -35,9 +35,10 @@ const ProductDetailsSreen = () => {
         return <ActivityIndicator />
     }
 
-    if (error) {
+    if (error || !product) {
         return <Text>Failed to fetch products</Text>
     }
+
     return (
         <View style={styles.container}>
             <Stack.Screen options={{ title: product.name }} />

@@ -11,7 +11,8 @@ export const useAdminOrderList = ({ archive = false }) => {
             const { data, error } = await supabase
                 .from('orders')
                 .select('*')
-                .in('status', statuses);
+                .in('status', statuses)
+                .order('created_at', { ascending: false });
             if (error) {
                 throw new Error(error.message);
             }
@@ -30,7 +31,8 @@ export const useUserOrderList = () => {
             const { data, error } = await supabase
                 .from('orders')
                 .select('*')
-                .eq('user_id', id);
+                .eq('user_id', id)
+                .order('created_at', { ascending: false });
             if (error) {
                 throw new Error(error.message);
             }
@@ -46,7 +48,7 @@ export const useOrderDetails = (id: number) => {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('orders')
-                .select('*')
+                .select('*, order_items(*, products(*))')
                 .eq('id', id)
                 .single();
             if (error) {
@@ -65,7 +67,8 @@ export const useInsertOrder = () => {
         async mutationFn(data: InsertTables<'orders'>) {
             const { error, data: newOrder } = await supabase
                 .from('orders')
-                .insert([{ ...data, user_id: userID ?? '' }])
+                .insert(data)
+                .select()
                 .single();
             if (error) {
                 throw new Error(error.message);
