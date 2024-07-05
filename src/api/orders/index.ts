@@ -75,9 +75,9 @@ export const useInsertOrder = () => {
             }
             return newOrder;
         },
-        // invalidate the cache to synchronous  display new order
+        // invalidate the cache to synchronous display new order
         async onSuccess() {
-            await queryClient.invalidateQueries({ queryKey: ['orders', { user_id: userID }] });
+            await queryClient.invalidateQueries({ queryKey: ['orders'] });
         },
     })
 }
