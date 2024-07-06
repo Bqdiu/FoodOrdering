@@ -3,7 +3,7 @@ import React from 'react'
 import { supabase } from '@/src/lib/supabase'
 import Button from '@/src/components/Button'
 
-const profile = () => {
+const ProfileScreen = () => {
     return (
         <View>
             <Button text='Sign out' onPress={async () => await supabase.auth.signOut()} />
@@ -11,4 +11,4 @@ const profile = () => {
     )
 }
 
-export default profile
+export default ProfileScreen
