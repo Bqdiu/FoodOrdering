@@ -6,7 +6,10 @@ import Colors from '@/src/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useDeleteProduct, useInsertProduct, useProduct, useUpdateProduct } from '@/src/api/products';
-
+import * as FileSystem from 'expo-file-system'
+import { randomUUID } from 'expo-crypto';
+import { supabase } from '@/src/lib/supabase';
+import { decode } from 'base64-arraybuffer';
 const CreateProductScreen = () => {
 
     const [name, setName] = useState('');
@@ -26,16 +29,16 @@ const CreateProductScreen = () => {
 
 
     useEffect(() => {
-        if(updatingProduct){
+        if (updatingProduct) {
             setName(updatingProduct.name);
             setPrice(updatingProduct.price.toString());
             setImage(updatingProduct.image);
         }
-    },[updatingProduct])
+    }, [updatingProduct])
 
     const router = useRouter();
 
-    const resetField = () => {
+    const resetFields = () => {
         setName('');
         setPrice('');
     }
@@ -48,8 +51,6 @@ const CreateProductScreen = () => {
             aspect: [4, 3],
             quality: 1,
         });
-
-        console.log(result);
 
         if (!result.canceled) {
             setImage(result.assets[0].uri);
@@ -82,38 +83,42 @@ const CreateProductScreen = () => {
             onCreate();
         }
     };
-    const onCreate = () => {
+    const onCreate = async () => {
         if (!validateInput()) {
             return;
         }
-        console.warn('Creating product: ', name);
+        const imagePath = await uploadImage();
         // Save in the database
-        insertProduct({ name, price: parseFloat(price), image },
+        insertProduct(
+            { name, price: parseFloat(price), image: imagePath },
             {
                 onSuccess: () => {
-                    resetField();
+                    resetFields();
                     router.back();
-                }
-            })
+                },
+            }
+        );
     };
 
     const onUpdate = () => {
         if (!validateInput()) {
             return;
         }
-        updateProduct({id, name, price: parseFloat(price), image },{
+        updateProduct({ id, name, price: parseFloat(price), image }, {
             onSuccess: () => {
-                resetField();
+                resetFields();
                 router.back();
             }
         })
     };
 
     const onDelete = () => {
-        deleteProduct(id, {onSuccess: () => {
-            resetField();
-            router.replace('/(admin)');
-        }})
+        deleteProduct(id, {
+            onSuccess: () => {
+                resetFields();
+                router.replace('/(admin)');
+            }
+        })
     };
 
     const confimDelete = () => {
@@ -127,6 +132,28 @@ const CreateProductScreen = () => {
                 onPress: onDelete
             },
         ])
+    };
+    // upload image to supabase storage
+    const uploadImage = async () => {
+        if (!image?.startsWith('file://')) {
+            return;
+        }
+
+        const base64 = await FileSystem.readAsStringAsync(image, {
+            encoding: 'base64',
+        });
+        const filePath = `${randomUUID()}.png`;
+        const contentType = 'image/png';
+
+        const { data, error } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, decode(base64), { contentType });
+
+        console.log(error);
+
+        if (data) {
+            return data.path;
+        }
     };
 
     return (
