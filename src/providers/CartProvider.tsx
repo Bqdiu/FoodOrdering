@@ -5,7 +5,7 @@ import { useInsertOrder } from "../api/orders";
 import { useRouter } from "expo-router";
 import { useAuth } from "./AuthProvider";
 import { useInsertOrderItems } from "../api/order_items";
-
+import { initialisePaymentSheet, openPaymentSheet } from "../lib/stripe";
 type Product = Tables<'products'>
 
 type CartType = {
@@ -62,7 +62,13 @@ const CartProvider = ({ children }: PropsWithChildren) => {
     const total = items.reduce((sum, item) => (sum += item.product.price * item.quantity), 0);
     const { session } = useAuth();
     const userID = session?.user.id;
-    const checkout = () => {
+    const checkout = async () => {
+        // convert to integer cause stripe use pennies or cent
+        await initialisePaymentSheet(Math.floor(total * 100));
+        const payed = await openPaymentSheet();
+        if(!payed){
+            return;
+        }
         insertOrder(
             { total, user_id: userID ?? '' },
             {
