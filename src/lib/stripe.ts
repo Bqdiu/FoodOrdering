@@ -13,12 +13,14 @@ const fetchPaymentSheetParams = async (amount: number) => {
 
 export const initialisePaymentSheet = async (amount: number) => {
     console.log('Initalise payment sheet, for: ', amount);
-    const { paymentIntent, publishableKey } = await fetchPaymentSheetParams(amount);
+    const { paymentIntent, publishableKey, customer, ephemeralKey } = await fetchPaymentSheetParams(amount);
     if (!paymentIntent || !publishableKey) return;
     await initPaymentSheet({
         merchantDisplayName: "Bqdieu",
         paymentIntentClientSecret: paymentIntent,
         returnURL: 'example://stripe-redirect', 
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
         defaultBillingDetails:{
             name: 'Dieu'
         }
