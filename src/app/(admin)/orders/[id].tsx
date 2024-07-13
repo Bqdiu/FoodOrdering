@@ -6,16 +6,22 @@ import OrdersListItem from '@/src/components/OrdersListItem';
 import { OrderStatusList } from '@/src/types';
 import Colors from '@/src/constants/Colors';
 import { useOrderDetails, useUpdateOrder } from '@/src/api/orders';
+import { notifyUserAboutOrderUpdate } from '@/src/lib/notification';
 
 const OrderDetailScreen = () => {
-    const { id: idString } = useLocalSearchParams(); 
+    const { id: idString } = useLocalSearchParams();
     const idStringValue = typeof idString === 'string' ? idString : Array.isArray(idString) ? idString[0] : "";
     const id = parseFloat(idStringValue);
     const { data: order, isLoading, error } = useOrderDetails(id);
-    
-    const {mutate: updateOrder} = useUpdateOrder();
-    const updateStatus = (status: string) =>{
-        updateOrder({id: id, updatedFields: {status}});
+
+    const { mutate: updateOrder } = useUpdateOrder();
+    const updateStatus = async(status: string) => {
+        const updateResult = await updateOrder({ id: id, updatedFields: { status } });
+        console.log('Update result: ', updateResult);
+        console.log('Notify: ', order?.user_id);
+        if (order) {
+            await notifyUserAboutOrderUpdate({...order, status});
+        }
     }
     if (isLoading) {
         return <ActivityIndicator />
